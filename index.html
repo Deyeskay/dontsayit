@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Don't Say It!</title>
+  <title>SK Games | Don't Say It!</title>
   <!-- IMPORTANT for phones & tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -525,17 +525,23 @@
       render();
     }
 
-    function dealCard() {
-      if (deck.length === 0) {
-        if (discard.length === 0) return;
-        deck = discard.slice();
-        discard = [];
-      }
-      const card = deck.pop();
-      if (currentCard) discard.push(currentCard);
-      currentCard = card;
-      render();
-    }
+    function dealCard() { 
+	  // 🚫 STOP when deck is empty
+	  if (deck.length === 0) {
+		alert("No cards left in the deck!");
+		return;
+	  }
+
+	  const card = deck.pop();
+
+	  if (currentCard)
+		discard.push(currentCard);
+
+	  currentCard = card;
+
+	  render();
+	}
+
 
     function undo() {
       if (!currentCard && discard.length === 0) return;
@@ -568,8 +574,8 @@
       cardContainer.innerHTML = `
         <div class="card-inner">
           <div class="card-header">
-            <div class="card-bubble">${word}</div>
-            <div class="card-score">${score}</div>
+            <div class="card-bubble">${word}</div> 
+			<div class="card-score">${(discard.length + 1)}</div> 
           </div>
 
           <div class="card-body">
