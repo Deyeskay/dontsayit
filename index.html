@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Don't Say It!</title>
+  <!-- IMPORTANT for phones & tablets -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #7eceff, #f9f3c3);
+    }
+
+    .game-wrapper {
+      width: min(1000px, 100vw - 16px);
+      max-width: 100%;
+      padding: 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      column-gap: 16px;
+      row-gap: 12px;
+    }
+
+    /* LEFT: deck area */
+    .deck-area {
+      position: relative;
+      background: #f6e0e0;
+      border-radius: 18px;
+      border: 3px solid #c28b8b;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      min-height: 220px;
+    }
+
+    .deck-stack {
+      position: relative;
+      width: 70%;
+      max-width: 260px;
+      height: 85%;
+      max-height: 380px;
+      background: #b77a7a;
+      border-radius: 14px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+	
+	.deck-stack {
+	  cursor: pointer;
+	  touch-action: manipulation;
+	}
+
+    .deck-stripes {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 28%;
+      background-image: repeating-linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.15) 0,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+      border-radius: 0 0 14px 14px;
+    }
+
+    .deck-count {
+      position: absolute;
+      bottom: 10px;
+      right: 14px;
+      font-size: 0.78rem;
+      color: #fbecec;
+      opacity: 0.9;
+    }
+
+    /* RIGHT: card area */
+    .card-area {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 340px;
+      background: #ffc94a;
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+      cursor: pointer;            /* visual hint that you can tap */
+      touch-action: manipulation; /* smoother tap on mobile */
+    }
+
+    .card-inner {
+      border-radius: 14px;
+      background: #fdf6cf;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 180px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .card-bubble {
+      background: #fff;
+      border-radius: 50px;
+      padding: 8px 14px;
+      min-width: 90px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(18px, 4vw, 22px);
+      font-weight: 700;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-score {
+      font-size: clamp(20px, 4.5vw, 24px);
+      font-weight: 700;
+      color: #c22a2a;
+    }
+
+    .card-body {
+      flex: 1;
+      background: linear-gradient(#ffe959 23%, #36b43c 23%);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .dont-say {
+      font-size: clamp(18px, 4vw, 22px);
+      font-weight: 800;
+      color: #951b1b;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+      margin-bottom: 4px;
+    }
+
+    .taboo-list {
+      margin-top: 4px;
+      font-size: clamp(16px, 3.8vw, 20px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.25;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .card-footer span {
+      font-size: 0.7rem;
+      color: #555;
+    }
+
+    .small-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #fdd084;
+      border: 3px solid #e9943b;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .small-avatar::before,
+    .small-avatar::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    .small-avatar::before {
+      width: 60%;
+      height: 60%;
+      background: #f9d0a1;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .small-avatar::after {
+      width: 70%;
+      height: 70%;
+      background: transparent;
+      border: 3px solid #f9d0a1;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .placeholder {
+      font-size: clamp(16px, 3.6vw, 18px);
+      text-align: center;
+      color: #777;
+      padding: 18px;
+    }
+	
+	/* ✅ Keeps ALL forbidden words inside the GREEN panel */
+	.taboo-panel {
+	  background: #36b43c;
+	  border-radius: 12px;
+	  padding: 10px 14px;
+	  margin-top: 6px;
+	  flex: 1;
+
+	  display: flex;
+	  align-items: center;
+	}
+
+	.taboo-list {
+	  width: 100%;
+	}
+
+
+    /* Controls */
+    .controls {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #ffe598;
+      box-shadow: 0 4px 0 #c79b45;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      min-width: 90px;
+    }
+
+    button:hover {
+      background: #ffefb8;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 0 #c79b45;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 #c79b45;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: 0 4px 0 #c79b45;
+    }
+
+    .small-text {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-left: 4px;
+      text-align: center;
+    }
+
+    /* --- Tablet & Mobile tweaks --- */
+    @media (max-width: 900px) {
+      .game-wrapper {
+        grid-template-columns: 1fr;
+        row-gap: 14px;
+      }
+
+      .deck-area {
+        order: 1;
+        min-height: 180px;
+      }
+
+      .card-area {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .game-wrapper {
+        margin: 8px 0;
+        border-radius: 16px;
+        padding: 10px;
+      }
+
+      .deck-area {
+        padding: 8px;
+      }
+
+      .deck-stack {
+        width: 60%;
+        height: 78%;
+      }
+
+      .controls {
+        gap: 8px;
+      }
+
+      button {
+        flex: 1 1 30%;
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+
+      .small-text {
+        flex-basis: 100%;
+      }
+    }
+	
+	/* ===== Modal for loading cards ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #fffbea;
+  border-radius: 16px;
+  padding: 16px;
+  max-width: 520px;
+  width: calc(100% - 32px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-content h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+#cardJsonInput {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d4c374;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 13px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  min-width: 80px;
+}
+
+.modal-hint {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+  </style>
+</head>
+<body>
+  <div class="game-wrapper"> 
+   
+    <!-- Deck area -->
+    <div class="deck-area">
+      <div class="deck-stack" id="deckStack">
+        <div class="deck-stripes"></div>
+        <div class="deck-count">
+          Cards left: <span id="deckCount">0</span>
+        </div>
+      </div>
+    </div>
+	
+	    <!-- Card area -->
+    <div class="card-area">
+      <div id="cardContainer" class="card">
+        <div class="card-inner placeholder">
+          Tap the card or press <strong>Deal</strong> to start!
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+		<button id="shuffleBtn">Shuffle</button>
+		<button id="loadBtn">Load</button>
+		<button id="resetBtn">Reset</button>
+		<button id="undoBtn" disabled>Undo</button>
+		<button id="dealBtn">Deal</button>
+    <button id="copyPromptBtn">Copy Prompt</button>
+      <span class="small-text">Tip: edit the card list in the JavaScript section.</span>
+    </div>
+  </div>
+
+<div id="loadModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Load cards JSON</h2>
+    <textarea id="cardJsonInput" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button id="loadJsonBtn">Load</button>
+      <button id="closeModalBtn">Close</button>
+    </div>
+    <p class="small-text modal-hint">
+      Paste an array like:
+      [{ "word": "Tie", "taboo": ["suit","shirt","man","wear"], "score": 2 }, ...]
+    </p>
+  </div>
+</div>
+
+  <script>
+    // === CARD DATA =======================================================
+	const DEFAULT_CARDS = [
+	  { word: "Tie", taboo: ["suit", "shirt", "man", "wear"], score: 2 },
+	  { word: "Pizza", taboo: ["cheese", "slice", "eat", "delivery"], score: 2 },
+	  { word: "Airport", taboo: ["plane", "flight", "travel", "luggage"], score: 2 },
+	  { word: "Doctor", taboo: ["hospital", "medicine", "sick", "health"], score: 2 },
+	  { word: "Birthday", taboo: ["cake", "party", "age", "gift"], score: 2 },
+	  { word: "Football", taboo: ["goal", "team", "kick", "sport"], score: 2 },
+	  { word: "Ocean", taboo: ["sea", "water", "waves", "beach"], score: 2 }
+	];
+
+	const STORAGE_KEY = "dontSayItCards";
+
+	// current active card set (defaults to localStorage if available)
+	let cardSet = loadCardSetFromStorage() || DEFAULT_CARDS.slice();
+
+	let deck = [];
+	let discard = [];
+	let currentCard = null;
+
+	const deckCountEl = document.getElementById("deckCount");
+	const cardContainer = document.getElementById("cardContainer");
+	const shuffleBtn = document.getElementById("shuffleBtn");
+	const loadBtn = document.getElementById("loadBtn");
+	const resetBtn = document.getElementById("resetBtn");
+	const undoBtn = document.getElementById("undoBtn");
+	const dealBtn = document.getElementById("dealBtn");
+	const copyPromptBtn = document.getElementById("copyPromptBtn");
+
+	// modal elements
+	const loadModal = document.getElementById("loadModal");
+	const cardJsonInput = document.getElementById("cardJsonInput");
+	const loadJsonBtn = document.getElementById("loadJsonBtn");
+	const closeModalBtn = document.getElementById("closeModalBtn");
+
+	function loadCardSetFromStorage() {
+	  try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? parsed : null;
+	  } catch (e) {
+		console.warn("Invalid stored card data", e);
+		return null;
+	  }
+	}
+
+	function saveCardSetToStorage(cards) {
+	  try {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+	  } catch (e) {
+		console.warn("Could not save cards", e);
+	  }
+	}
+
+	function cloneCards() {
+	  return cardSet.map(c => ({ ...c }));
+	}
+
+
+    // Fisher–Yates shuffle
+    function shuffleDeck() {
+      deck = cloneCards();
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      discard = [];
+      currentCard = null;
+      render();
+    }
+
+    function dealCard() {
+      if (deck.length === 0) {
+        if (discard.length === 0) return;
+        deck = discard.slice();
+        discard = [];
+      }
+      const card = deck.pop();
+      if (currentCard) discard.push(currentCard);
+      currentCard = card;
+      render();
+    }
+
+    function undo() {
+      if (!currentCard && discard.length === 0) return;
+
+      if (discard.length === 0) {
+        deck.push(currentCard);
+        currentCard = null;
+      } else {
+        deck.push(currentCard);
+        currentCard = discard.pop();
+      }
+      render();
+    }
+
+    function render() {
+      deckCountEl.textContent = deck.length;
+      undoBtn.disabled = !currentCard && discard.length === 0;
+
+      if (!currentCard) {
+        cardContainer.innerHTML = `
+          <div class="card-inner placeholder">
+            Tap the card or press <strong>Deal</strong> to show the first card.
+          </div>
+        `;
+        return;
+      }
+
+      const { word, taboo, score } = currentCard;
+
+      cardContainer.innerHTML = `
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-bubble">${word}</div>
+            <div class="card-score">${score}</div>
+          </div>
+
+          <div class="card-body">
+  
+		  <div class="dont-say">Don't say it!</div>
+
+		  <!-- ✅ GREEN PANEL -->
+		  <div class="taboo-panel">
+			  <div class="taboo-list">
+				${taboo.map(t => t).join("<br>")}
+			  </div>
+		  </div>
+
+		  <div class="card-footer">
+			<span>Tap card = next card</span>
+			<div class="small-avatar"></div>
+		  </div>
+
+		</div>
+
+        </div>
+      `;
+    }
+
+    // Event listeners
+	shuffleBtn.addEventListener("click", shuffleDeck);
+	dealBtn.addEventListener("click", dealCard);
+	cardContainer.addEventListener("click", dealCard);
+	undoBtn.addEventListener("click", undo);
+
+	document.getElementById("deckStack").addEventListener("click", dealCard);
+
+	// === Load modal logic ===
+	loadBtn.addEventListener("click", () => {
+	  // Pre-fill with current set
+	  //cardJsonInput.value = JSON.stringify(cardSet, null, 2);
+	  loadModal.classList.remove("hidden");
+	});
+
+	closeModalBtn.addEventListener("click", () => {
+	  loadModal.classList.add("hidden");
+	});
+
+	// click on backdrop closes modal
+	loadModal.addEventListener("click", (e) => {
+	  if (e.target === loadModal) {
+		loadModal.classList.add("hidden");
+	  }
+	});
+	
+	// === Reset to defaults ===
+	resetBtn.addEventListener("click", () => {
+	  localStorage.removeItem(STORAGE_KEY); // clear saved cards
+	  cardSet = DEFAULT_CARDS.slice();      // reload defaults
+	  shuffleDeck();                        // rebuild deck
+	});
+	
+	// Copy JSON-generation prompt for ChatGPT
+// Copy JSON-generation prompt for ChatGPT
+copyPromptBtn.addEventListener("click", () => {
+  const promptText =
+"Generate a JSON array for a \"Don't Say It\" style word game.\n\n" +
+"VERY IMPORTANT RULES:\n" +
+"- Your reply MUST be valid JSON ONLY.\n" +
+"- Do NOT include any explanations, comments, markdown, or surrounding text.\n" +
+"- Do NOT wrap the JSON in any markdown code block or code fence. Just return raw JSON.\n\n" +
+"CARD FORMAT:\n" +
+"Each object must follow exactly this structure:\n\n" +
+"{\n" +
+"  \"word\": \"MAIN_WORD\",\n" +
+"  \"taboo\": [\"forbidden1\",\"forbidden2\",\"forbidden3\",\"forbidden4\"],\n" +
+"  \"score\": 2\n" +
+"}\n\n" +
+"RULES FOR WORDS:\n" +
+"- \"word\" must be a SINGLE simple English word (no spaces, no hyphens).\n" +
+"- Use kid-friendly vocabulary (suitable for children or families).\n" +
+"- \"taboo\" must be an array of EXACTLY 4 strings.\n" +
+"- Each taboo word must be closely related to the main word, but NOT identical.\n" +
+"- Do not repeat a taboo word inside the same card.\n" +
+"- Avoid plurals if possible (prefer \"apple\" over \"apples\").\n" +
+"- \"score\" must be the number 2 for ALL cards.\n\n" +
+"CATEGORY STRUCTURE:\n" +
+"Generate cards from these categories:\n\n" +
+"1) Home items\n" +
+"2) Food & Kitchen\n" +
+"3) Professions\n" +
+"4) Family / Relations\n" +
+"5) Travel & Transport\n" +
+"6) Nature & Outdoors\n\n" +
+"CARD COUNTS:\n" +
+"- Generate EXACTLY 10 cards per category above.\n" +
+"- That is 10 × 6 = 60 cards so far.\n\n" +
+"BONUS HARDER CARDS:\n" +
+"- After those 60, add 5 extra “hard mode” cards with more abstract concepts, such as:\n" +
+"  - Feelings\n" +
+"  - Values\n" +
+"  - Time-related or idea-based words\n" +
+"- These 5 should still follow the same structure and rules.\n\n" +
+"GLOBAL CONSTRAINTS:\n" +
+"- Total cards in the JSON array = 65.\n" +
+"- Try to avoid using the same MAIN_WORD more than once.\n" +
+"- As much as possible, do NOT use any taboo word as the MAIN_WORD of another card in the deck.\n" +
+"- Also try to avoid reusing the same taboo word too many times across cards (a little repetition is OK, but keep it varied).\n\n" +
+"OUTPUT FORMAT:\n" +
+"- Return ONE single JSON array: [ {...}, {...}, ... ]\n" +
+"- No trailing commas.\n" +
+"- No comments.\n" +
+"- No extra keys other than \"word\", \"taboo\", and \"score\".\n\n" +
+"Return ONLY the JSON array and nothing else.";
+
+  navigator.clipboard.writeText(promptText)
+    .then(() => {
+      alert("Prompt copied! Paste it into ChatGPT to generate cards.");
+    })
+    .catch(() => {
+      alert("Could not copy to clipboard. Please copy manually.");
+    });
+});
+
+
+
+	loadJsonBtn.addEventListener("click", () => {
+	  const text = cardJsonInput.value.trim();
+	  if (!text) return;
+
+	  try {
+		const parsed = JSON.parse(text);
+		if (!Array.isArray(parsed)) {
+		  alert("JSON must be an array of card objects.");
+		  return;
+		}
+		// basic shape check
+		if (
+		  parsed.length > 0 &&
+		  (typeof parsed[0].word !== "string" ||
+			!Array.isArray(parsed[0].taboo))
+		) {
+		  alert('Each card needs: { "word": "...", "taboo": ["..."], "score": 2 }');
+		  return;
+		}
+
+		cardSet = parsed;
+		saveCardSetToStorage(cardSet);
+		shuffleDeck(); // rebuild deck with new cards
+		loadModal.classList.add("hidden");
+	  } catch (err) {
+		console.error(err);
+		alert("Invalid JSON. Please check your syntax.");
+	  }
+	});
+
+	// Initial state
+	shuffleDeck();
+
+  </script>
+</body>
+</html>
