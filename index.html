@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
+  <meta name="description" content="SK Games — Don't Say It. A hilarious word-guessing game where saying the obvious words is strictly forbidden — think fast or get caught!">
+  <meta property="og:title" content="SK Games — Don't Say It">
+  <meta property="og:description" content="SK Games — Don't Say It. A hilarious word-guessing game where saying the obvious words is strictly forbidden — think fast or get caught!">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://deyeskay.github.io/hub/">
+  <meta property="og:image" content="https://deyeskay.github.io/hub/sk-icon.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="https://deyeskay.github.io/hub/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0c0c0f"> 
   <title>SK Games | Don't Say It!</title>
   <!-- IMPORTANT for phones & tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -401,10 +411,32 @@
   opacity: 0.7;
 }
 
+.brand {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+}
+.brand img {
+    margin-left: -5px;
+    height: 60px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .25));
+}
   </style>
 </head>
 <body>
-  <div class="game-wrapper"> 
+	
+<header class="brand">
+  <img src="skgames_icon.svg" alt="DumbCharades logo">
+  <span class="t">DumbCharades</span>
+</header>
+	
+  <div class="game-wrapper" style="margin-top:50px"> 
    
     <!-- Deck area -->
     <div class="deck-area">
@@ -733,3 +765,4 @@ copyPromptBtn.addEventListener("click", () => {
   </script>
 </body>
 </html>
+
